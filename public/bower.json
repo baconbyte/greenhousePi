@@ -1,0 +1,8 @@
+{
+  "name": "green-house-pi",
+  "version": "0.0.1",
+  "dependencies": {
+    "angular-chart.js": "^0.8.8"
+  },
+  "private": true
+}

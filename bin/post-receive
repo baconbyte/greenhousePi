@@ -1,0 +1,10 @@
+#!/bin/sh
+read oldrev newrev ref
+branchname=${ref#refs/heads/}
+DEPLOYDIR=~/apps/greenhouse_app
+GIT_WORK_TREE="$DEPLOYDIR" git checkout -f ${branchname}
+cd "$DEPLOYDIR"
+forever stop index.js
+npm install
+forever start index.js
+echo "Greenhouse App deployed ;)"

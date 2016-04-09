@@ -1,0 +1,163 @@
+<html lang="en" ng-app="GreenhouseApp">
+
+<head>
+    <meta name="viewport" content="initial-scale=1"/>
+    <link rel="stylesheet"
+          href="https://ajax.googleapis.com/ajax/libs/angular_material/1.0.0-rc1/angular-material.min.css">
+    <link rel="stylesheet" href="style/app.css">
+    <link rel="stylesheet" href="bower_components/angular-chart.js/dist/angular-chart.css">
+</head>
+
+<body layout="column">
+<div ng-cloak>
+    <md-content>
+        <md-tabs md-dynamic-height md-border-bottom>
+            <md-tab label="Temperature">
+                <md-content class="md-padding">
+                    <div ng-controller="ThermometerController as vm">
+                        <div layout="row" layout-padding>
+                            <div ng-repeat="thermometer in vm.thermometers">
+                                <div>
+                                    <md-card layout-padding>
+                                        <md-card-title>
+                                            <md-card-title-text>
+                                                <span class="md-subhead">{{thermometer.name}}</span>
+
+                                                <h1 class="md-display-4">{{thermometer.temperature}}°C</h1>
+                                            </md-card-title-text>
+                                        </md-card-title>
+                                    </md-card>
+                                </div>
+                            </div>
+                        </div>
+                        <div layout="row" layout-padding>
+                            <div>
+                                <div class="chart-container">
+                                    <canvas id="hourly" class="chart chart-line ng-isolate-scope" chart-data="vm.hourlyData"
+                                            chart-labels="vm.hourlyLabels" chart-legend="true" chart-click="onClick"
+                                            chart-hover="onHover" chart-series="vm.series"
+                                            style="width: 900px; height: 350px;"></canvas>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div layout="row" layout-padding>
+                            <div>
+                                <div class="chart-container">
+                                    <canvas id="daily" class="chart chart-line ng-isolate-scope" chart-data="vm.dailyData"
+                                            chart-labels="vm.dailyLabels" chart-legend="true" chart-click="onClick"
+                                            chart-hover="onHover" chart-series="vm.series"
+                                            style="width: 900px; height: 350px;"></canvas>
+
+                                </div>
+                            </div>
+                        </div>
+                </md-content>
+            </md-tab>
+            <md-tab label="Taps">
+                <div ng-controller="AppController as vm">
+                    <div ng-repeat="tap in vm.taps">
+                        <div flex="50">
+                            <md-card layout-padding>
+                                <md-card-title>
+                                    <md-card-title-text>
+                                        <span class="md-headline"> {{tap.name}}</span>
+                                    </md-card-title-text>
+                                    <md-card-actions layout="row" layout-align="start center">
+                                        Tap
+                                        <md-switch class="md-warn" ng-model="tap.status"
+                                                   aria-label="Switch for {{tap.name}}"
+                                                   ng-change="vm.update(tap)">
+                                        </md-switch>
+                                        Timer Function
+                                        <md-switch class="md-primary" ng-model="vm.timer"
+                                                   aria-label="Timer for {{tap.name}}">
+                                        </md-switch>
+                                    </md-card-actions>
+                                    <md-card-actions layout="row" layout-align="start center" ng-show="vm.timer"
+                                                     layout-padding>
+                                        <md-progress-linear md-mode="determinate"
+                                                            ng-value="100/vm.editSeconds[tap.id]*tap.timerSeconds"
+                                                            ng-class="{'visible' : !tap.timerStatus}"></md-progress-linear>
+                                    </md-card-actions>
+                                    <div layout="row" ng-show="vm.timer">
+                                        <h1 class="md-title" ng-show="tap.timerStatus">{{tap.timerSeconds |
+                                            secondsToDateTime | date:'HH:mm:ss'}}</h1>
+
+                                        <h1 class="md-title" ng-show="!tap.timerStatus">{{vm.editSeconds[tap.id] |
+                                            secondsToDateTime | date:'HH:mm:ss'}}</h1>
+                                        <md-button class="md-raised md-primary" ng-click="vm.incrementTime(tap)"
+                                                   ng-disabled="tap.timerStatus">+1m
+                                        </md-button>
+                                        <md-button class="md-raised md-primary" ng-click="vm.decrementTime(tap)"
+                                                   ng-disabled="tap.timerStatus">-1m
+                                        </md-button>
+                                    </div>
+                                </md-card-title>
+                                <md-card-actions layout="row" layout-align="end center" ng-show="vm.timer">
+
+                                    <md-button class="md-raised md-primary" ng-click="vm.toggleTimer(tap)">
+                                        {{tap.timerStatus
+                                        | timerLabel }}
+                                    </md-button>
+                                </md-card-actions>
+                            </md-card>
+                        </div>
+                    </div>
+                </div>
+            </md-tab>
+            <md-tab label="Photos">
+                <div ng-controller="ImageController as vm">
+                    <div layout="row" layout-align="center center">
+                        <div flex="25">
+                        </div>
+                        <div flex="50">
+                            <md-card>
+                                <md-card-title>
+                                    <md-card-title-text>
+                                        <span class="md-subhead paddedImage">Latest</span>
+                                    </md-card-title-text>
+                                    <md-card-title-media>
+                                        <div class="md-media-lg card-media paddedImage">
+                                            <img ng-src="{{vm.imageUrl}}"/>
+                                        </div>
+                                    </md-card-title-media>
+                                </md-card-title>
+                                <md-card-actions layout="row" layout-align="end center">
+                                    <md-button>Take Photo</md-button>
+                                </md-card-actions>
+                            </md-card>
+                        </div>
+                        <div flex="25">
+                        </div>
+                    </div>
+                </div>
+            </md-tab>
+        </md-tabs>
+    </md-content>
+</div>
+<!-- Angular Material Dependencies -->
+<!--<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>-->
+<script src="bower_components/angular/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular-aria.min.js"></script>
+
+<script src="bower_components/Chart.js/Chart.min.js"></script>
+<script src="bower_components/angular-chart.js/dist/angular-chart.min.js"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.0.0-rc1/angular-material.min.js"></script>
+<script src="scripts/app.js"></script>
+<script src="scripts/filters/seconds-to-time.js"></script>
+<script src="scripts/filters/timer-label.js"></script>
+<script src="scripts/thermometer-controller.js"></script>
+<script src="scripts/thermometer-service.js"></script>
+<script src="scripts/tap-controller.js"></script>
+<script src="scripts/tap-service.js"></script>
+<script src="scripts/image-controller.js"></script>
+<script src="scripts/image-service.js"></script>
+
+<script src="scripts/angular-resource.min.js"></script>
+<script src="scripts/angular-route.min.js"></script>
+</body>
+
+</html>
